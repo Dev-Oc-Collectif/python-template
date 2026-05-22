@@ -1,0 +1,56 @@
+python_version:
+  type: str
+  description: "Python version for development of the project."
+  default: "3.14"
+  help: "Which python version should be used ?"
+
+layout:
+  type: str
+  description: "Project layout."
+  choices: ["flat", "src", "file"]
+  default: "flat"
+  help: "Choose one of the given layout for your project structure."
+
+project_name:
+  type: str
+  description: "Project name."
+  help: "What is the name of the project ?"
+  default: "project-name"
+
+description:
+  type: str
+  description: "Project description."
+  default: "Project description."
+  help: "Can you give a short description of the project ?"
+
+module_name:
+  type: str
+  description: "Project module name."
+  default: "{{ project_name.lower().replace(' ', '_').replace('-', '_') }}"
+  help: "What is the project module name ?"
+
+version:
+  type: str
+  description: "Project version."
+  default: "0.0.0"
+  help: "What is the initial version of the project ?"
+
+full_name:
+  type: str
+  description: "Author's full name."
+  help: "Who is the author of the project ?"
+  default: "None None"
+
+email:
+  type: str
+  description: "Author's email address."
+  help: "What is the email address of the author ?"
+  default: "example@exemple.com"
+
+_subdirectory: template
+_tasks:
+  - name: "Initialize git repository"
+    command: "git init"
+  - name: "Add all files to git"
+    command: "git add ."
+_preserve_symlinks: true

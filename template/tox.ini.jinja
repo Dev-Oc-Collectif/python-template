@@ -1,0 +1,65 @@
+[tox]
+requires =
+    tox>=4
+    tox-uv>=1.0.0
+isolated_build = True
+envlist =
+    py{{python_version | replace(".", "")}}
+    test
+    types
+    lint
+    docs
+    security
+skip_missing_interpreters = True
+default_base_python = {{python_version | replace(".", "")}}
+
+[testenv:test]
+description = Run tests with coverage
+dependency_groups = tests
+commands =
+    pytest \
+        --cov-fail-under=80 \
+        --cov={{module_name}} \
+        --cov-report=term-missing \
+        tests/ --disable-pytest-warnings
+
+[testenv:types]
+description = Run static type checks
+ignore_errors = true
+dependency_groups = typing
+commands =
+    mypy --install-types \
+        -p={{module_name}} \
+        --show-error-codes \
+        --non-interactive
+    mypy --install-types tests \
+        --show-error-codes \
+        --non-interactive
+    ty check
+
+[testenv:docs]
+description = Test documentation build
+dependency_groups = docs
+commands =
+    zensical build
+
+[testenv:security]
+description = Run Security checks
+ignore_outcome = true
+dependency_groups = security
+commands =
+    {% if layout == "file" -%}bandit -q -r {{module_name}}.py{%- endif -%}
+    {%- if layout == "src" -%}bandit -q -r src/{{module_name}}{%- endif -%}
+    {%- if layout == "flat" -%}bandit -q -r {{module_name}}{%- endif %}
+    uv audit --preview-features audit
+
+[testenv:lint]
+description = Run linters
+dependency_groups = lint
+ignore_errors = true
+commands =
+    ruff check
+    ruff format --check
+    ssort --check
+    zizmor .github
+    just --check --fmt

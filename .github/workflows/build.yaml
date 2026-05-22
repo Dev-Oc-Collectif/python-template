@@ -1,0 +1,73 @@
+name: Template generation self-check
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  generate-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+        layout: ["flat", "src", "file"]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b  # v8.1.0
+        with:
+          enable-cache: true
+
+      - name: Install direnv
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y direnv
+
+      - run: uv tool install copier
+      - name: Generate project from template
+        run: |
+          uvx copier copy --force --trust $GITHUB_WORKSPACE ./a-module \
+            --data layout=${{ matrix.layout }} \
+            --data project_name=a-module \
+            --data python_version=${{ matrix.python-version }}
+
+      - name: Emulate installing dependencies of generated project
+        working-directory: ./a-module
+        run: uv venv .venv && uv sync
+
+      - name: Setup direnv for generated project
+        working-directory: ./a-module
+        run: |
+            direnv allow .
+            direnv export gha >> "$GITHUB_ENV"
+
+      - name: Run tox environments (tests, typing, docs)
+        working-directory: ./a-module
+        run: tox
+
+      - name: Build package
+        working-directory: ./a-module
+        run: uv build .
+
+      - name: Artifact dist
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: generated-${{ matrix.python-version }}-${{ matrix.layout }}
+          path: a-module/dist/
+
+  validate-status:
+    runs-on: ubuntu-latest
+    needs: generate-and-test
+    steps:
+      - name: Validate status
+        run: echo "✅ All checks passed successfully!"
