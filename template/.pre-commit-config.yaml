@@ -79,6 +79,7 @@ repos:
         entry: just --check --fmt
         language: system
         files: ^Justfile$
+        pass_filenames: false
         require_serial: true
 
   - repo: https://github.com/commitizen-tools/commitizen

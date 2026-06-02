@@ -17,11 +17,7 @@ default_base_python = {{python_version | replace(".", "")}}
 description = Run tests with coverage
 dependency_groups = tests
 commands =
-    pytest \
-        --cov-fail-under=80 \
-        --cov={{module_name}} \
-        --cov-report=term-missing \
-        tests/ --disable-pytest-warnings
+    pytest tests
 
 [testenv:types]
 description = Run static type checks
@@ -30,12 +26,10 @@ dependency_groups = typing
 commands =
     mypy --install-types \
         -p={{module_name}} \
-        --show-error-codes \
         --non-interactive
     mypy --install-types tests \
-        --show-error-codes \
         --non-interactive
-    ty check
+    ty check {{module_name}} tests
 
 [testenv:docs]
 description = Test documentation build

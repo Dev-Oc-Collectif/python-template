@@ -26,8 +26,9 @@ check cmd:
 # Run formatters
 format:
     @uv run ruff format
+    @uv run ruff check --fix
     @uv run ssort
-    @uv run zizmor --fix=all
+    @uv run zizmor --fix=all .
     @uv run just --fmt
 
 # Manage the documentation

@@ -54,6 +54,14 @@ tests = [
 [tool.flit.module]
 name = "{{module_name}}"
 
+[tool.pytest.ini_options]
+addopts = [
+    "--cov={{module_name}}",
+    "--cov-report=term-missing",
+    "--cov-fail-under=80",
+    "--disable-pytest-warnings",
+]
+
 [tool.mypy]
 python_version = "{{python_version}}"
 warn_unused_configs = true
