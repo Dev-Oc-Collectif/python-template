@@ -29,7 +29,9 @@ commands =
         --non-interactive
     mypy --install-types tests \
         --non-interactive
-    ty check {{module_name}} tests
+    {% if layout == "file" -%}ty check {{module_name}}.py tests{%- endif -%}
+    {%- if layout == "src" -%}ty check src/{{module_name}} tests{%- endif -%}
+    {%- if layout == "flat" -%}ty check {{module_name}} tests{% endif %}
 
 [testenv:docs]
 description = Test documentation build
